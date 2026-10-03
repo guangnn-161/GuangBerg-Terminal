@@ -21,6 +21,7 @@
       </div>
 
       <div class="system-status">
+        <div style="color: var(--cyan); font-weight: bold; font-size: 11px;" id="viewerCount">ONLINE: 1 VIEWER</div>
         <div class="status-badge" id="wsStatusBadge">
           <span class="status-dot"></span>
           <span id="wsStatusText">WEBSOCKET LIVE</span>
@@ -418,8 +419,13 @@
     </footer>
   </div>
 
-  <!-- SCRIPT FILES -->
+  <!-- SCRIPT FILES (3-TIER ARCHITECTURE) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="data.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/vault.js"></script>
+  <script src="js/live.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

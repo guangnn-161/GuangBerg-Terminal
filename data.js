@@ -22,7 +22,7 @@ const PORTFOLIO_DATA = {
     ]
   },
 
-  // Tổng quan nghiên cứu & Phạm vi giao dịch (Thay vì số liệu PnL ảo)
+  // Tổng quan nghiên cứu & Phạm vi giao dịch
   researchOverview: {
     targetMarkets: "VN Market, Crypto, Forex",
     timeHorizon: "Intraday & Daily",
@@ -46,9 +46,17 @@ const PORTFOLIO_DATA = {
       code: "MT5-BACKTEST",
       name: "Backtest System for MT5 Alphas",
       summary: "Hệ thống kiểm thử chiến lược định lượng tự động được xây dựng chuyên biệt cho MetaTrader 5, đánh giá hiệu quả tín hiệu, độ trễ và mô hình hóa rủi ro.",
-      stack: ["Python", "MetaTrader 5 API", "NumPy", "Matplotlib"],
+      stack: ["Python", "MetaTrader 5 API", "NumPy", "Matplotlib", "GitHub Actions"],
       result: "Kiểm thử chiến lược đa khung thời gian (Intraday / Daily) và trích xuất báo cáo phân tích hiệu suất chi tiết.",
-      link: "https://github.com/guangnn-161/My_Card"
+      link: "https://github.com/guangnn-161/mt5_backtest_sys"
+    },
+    {
+      code: "POKER-PROB",
+      name: "Pokerlingo — Probability & Decision Engine",
+      summary: "Ứng dụng phân tích xác suất và tối ưu hóa quyết định trong lý thuyết trò chơi (Game Theory), làm chủ xác suất và kỳ vọng toán học.",
+      stack: ["TypeScript", "Probability Modeling", "Vercel", "Game Theory"],
+      result: "Công cụ tính toán xác suất thời gian thực, trực quan hóa kỳ vọng toán học (Expected Value).",
+      link: "https://github.com/guangnn-161/Pokerlingo"
     }
   ],
 
@@ -86,10 +94,10 @@ const PORTFOLIO_DATA = {
 
   // Kỹ năng & Công cụ thực tế
   skills: {
-    languages: ["Python (Core)", "SQL"],
+    languages: ["Python (Core)", "SQL", "TypeScript"],
     libraries: ["Pandas", "NumPy", "scikit-learn (sklearn)", "Matplotlib"],
     domains: ["Financial Modeling", "Econometrics", "Evolutionary Algorithms", "Time Series Analysis"],
-    platforms: ["WorldQuant BRAIN Platform", "MetaTrader 5 (MT5)", "Git & GitHub"]
+    platforms: ["WorldQuant BRAIN Platform", "MetaTrader 5 (MT5)", "GitHub", "Harness (CI/CD)"]
   },
 
   // Kinh nghiệm làm việc thực tế

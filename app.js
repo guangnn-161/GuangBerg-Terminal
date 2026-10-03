@@ -380,6 +380,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.toggleSound();
         break;
 
+      case 'admin':
+      case 'login':
+        window.location.href = 'admin.html';
+        break;
+
+      case 'vault':
+      case 'ls':
+        logCliOutput("VAULT: Quản lý kho tài liệu nghiên cứu và CV tại admin.html (Lệnh 'ADMIN')");
+        break;
+
       default:
         logCliOutput(`UNKNOWN COMMAND: "${cmdRaw}". TYPE 'HELP' FOR LIST.`, true);
         break;
@@ -443,4 +453,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initLiveL2OrderBook();
   initProjects();
   initContent();
+
+  // Supabase Realtime & Presence Hooks
+  if (typeof initPresenceViewers === 'function') {
+    initPresenceViewers();
+  }
+  if (typeof initRealtimeContent === 'function') {
+    initRealtimeContent(() => {
+      initProfile();
+      initProjects();
+      initContent();
+    });
+  }
 });

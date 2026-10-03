@@ -1,0 +1,32 @@
+name: Security & Syntax Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Quét rò rỉ khóa bí mật (Secret Leak Check)
+        run: |
+          echo "Scanning for exposed service_role or private secrets..."
+          if grep -rE "service_role|sb_secret|SUPABASE_SERVICE_KEY" --include="*.js" --include="*.html" .; then
+            echo "::error::Phát hiện khóa bí mật trong mã nguồn! Hãy xóa ngay."
+            exit 1
+          fi
+          echo "No secrets leaked in frontend files."
+
+      - name: Kiểm tra cú pháp JavaScript (JS Syntax Check)
+        run: |
+          echo "Verifying JS syntax..."
+          for f in $(find . -name "*.js" -not -path "./node_modules/*"); do
+            echo "Checking $f"
+            node --check "$f" || exit 1
+          done
+          echo "All JS files valid."
