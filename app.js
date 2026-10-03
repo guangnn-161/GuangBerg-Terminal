@@ -1,6 +1,6 @@
 /**
  * BLOOMBERG TERMINAL CORE APPLICATION JS
- * Live WebSocket & Interactive Backtest Engine
+ * Quang Nguyen - Research Consultant @ WorldQuant
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,11 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let soundEnabled = false;
   let audioCtx = null;
-  let activeNavTf = "ALL";
   let cmdHistory = [];
   let cmdHistoryIdx = -1;
 
-  // Audio Beep Generator
   function playBeep(freq = 800, duration = 0.05) {
     if (!soundEnabled) return;
     try {
@@ -65,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userName').innerText = p.name;
     document.getElementById('userTitle').innerText = p.title;
     document.getElementById('profileTicker').innerText = p.ticker;
-    document.getElementById('userLocation').innerText = p.location;
     document.getElementById('userStatus').innerText = p.status;
     
     if (document.getElementById('contactLinkedin')) {
@@ -73,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('contactLinkedin').innerText = p.linkedin;
     }
     if (document.getElementById('contactEmail')) {
+      document.getElementById('contactEmail').href = `mailto:${p.email}`;
       document.getElementById('contactEmail').innerText = p.email;
     }
     if (document.getElementById('contactGithub')) {
@@ -83,29 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const bioContainer = document.getElementById('userBio');
     if (bioContainer) {
       bioContainer.innerHTML = p.bio.map(para => `<p style="color: var(--gray-light); line-height: 1.5;">${para}</p>`).join('');
-    }
-
-    const m = PORTFOLIO_DATA.metrics;
-    const qm = document.getElementById('quickMetrics');
-    if (qm) {
-      qm.innerHTML = `
-        <div class="metric-card">
-          <div class="label">SHARPE RATIO</div>
-          <div class="value cyan">${m.sharpeRatio}</div>
-        </div>
-        <div class="metric-card">
-          <div class="label">SORTINO RATIO</div>
-          <div class="value green">${m.sortinoRatio}</div>
-        </div>
-        <div class="metric-card">
-          <div class="label">ANNUAL CAGR</div>
-          <div class="value amber">${m.cagr}</div>
-        </div>
-        <div class="metric-card">
-          <div class="label">MAX DRAWDOWN</div>
-          <div class="value green">${m.maxDrawdown}</div>
-        </div>
-      `;
     }
   }
 
@@ -167,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       ws.onerror = () => {
-        console.warn("WebSocket fallback to tick simulation");
+        console.warn("WebSocket fallback");
       };
     } catch (e) {
       console.warn("WebSocket init error", e);
@@ -192,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let totalBidVol = 0;
           let totalAskVol = 0;
 
-          // Asks (Sells - Top 5)
+          // Asks
           const asksHtml = data.asks.slice().reverse().map(ask => {
             const price = parseFloat(ask[0]).toFixed(2);
             const qty = parseFloat(ask[1]).toFixed(3);
@@ -206,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }).join('');
           l2Asks.innerHTML = asksHtml;
 
-          // Bids (Buys - Top 5)
+          // Bids
           const bidsHtml = data.bids.map(bid => {
             const price = parseFloat(bid[0]).toFixed(2);
             const qty = parseFloat(bid[1]).toFixed(3);
@@ -226,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
           // OFI Calculation
           const totalVol = totalBidVol + totalAskVol;
           const bidRatio = totalVol > 0 ? (totalBidVol / totalVol) * 100 : 50;
-          const askRatio = 100 - bidRatio;
           const ofiVal = ((totalBidVol - totalAskVol) / totalVol).toFixed(2);
 
           if (l2Ofi) l2Ofi.innerText = `OFI: ${ofiVal >= 0 ? '+' : ''}${ofiVal}`;
@@ -237,9 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const askText = document.getElementById('askPercentText');
 
           if (bidBar) bidBar.style.width = `${bidRatio.toFixed(1)}%`;
-          if (askBar) askBar.style.width = `${askRatio.toFixed(1)}%`;
+          if (askBar) askBar.style.width = `${(100 - bidRatio).toFixed(1)}%`;
           if (bidText) bidText.innerText = `BIDS: ${bidRatio.toFixed(1)}%`;
-          if (askText) askText.innerText = `ASKS: ${askRatio.toFixed(1)}%`;
+          if (askText) askText.innerText = `ASKS: ${(100 - bidRatio).toFixed(1)}%`;
         }
       };
     } catch (e) {
@@ -247,7 +221,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 5. Populate Strategies & Skills & Timeline
+  // 5. Populate Projects
+  function initProjects() {
+    const container = document.getElementById('projectList');
+    if (!container) return;
+
+    container.innerHTML = PORTFOLIO_DATA.projects.map(proj => `
+      <div class="strategy-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="strategy-code">${proj.code}</span>
+          <a href="${proj.link}" target="_blank" class="bloomberg-link" style="font-size: 11px;">VIEW ON GITHUB &lt;GO&gt;</a>
+        </div>
+        <div class="strategy-title">${proj.name}</div>
+        <div class="strategy-desc">${proj.summary}</div>
+        <div style="color: var(--green); font-size: 12px; margin-top: 4px;">
+          <strong>RESULT:</strong> ${proj.result}
+        </div>
+        <div class="tag-list">
+          ${proj.stack.map(tag => `<span class="tag">${tag}</span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 6. Populate Strategies & Skills & Timeline
   function initContent() {
     const stratContainer = document.getElementById('strategyList');
     if (stratContainer) {
@@ -255,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="strategy-card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span class="strategy-code">${s.code}</span>
-            <span style="color: var(--cyan); font-size: 12px; font-weight: bold;">ALLOCATION: ${s.allocation}</span>
+            <span style="color: var(--cyan); font-size: 12px; font-weight: bold;">${s.allocation}</span>
           </div>
           <div class="strategy-title">${s.name}</div>
           <div class="strategy-desc">${s.description}</div>
@@ -273,8 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     populateTags('skillsLanguages', sk.languages);
     populateTags('skillsLibraries', sk.libraries);
-    populateTags('skillsInfra', sk.infrastructure);
-    populateTags('skillsPlatforms', sk.tradingPlatforms);
+    populateTags('skillsDomains', sk.domains);
+    populateTags('skillsPlatforms', sk.platforms);
 
     const expContainer = document.getElementById('expTimeline');
     if (expContainer) {
@@ -303,203 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 6. Render NAV Canvas Chart
-  function renderNavChart() {
-    const canvas = document.getElementById('navChart');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    const width = canvas.width;
-    const height = canvas.height;
-    const padding = { top: 30, right: 30, bottom: 40, left: 50 };
-
-    ctx.clearRect(0, 0, width, height);
-
-    const data = PORTFOLIO_DATA.navData[activeNavTf] || PORTFOLIO_DATA.navData["ALL"];
-    if (!data || data.length === 0) return;
-
-    const allVals = data.flatMap(d => [d.nav, d.benchmark]);
-    const minVal = Math.min(...allVals) * 0.95;
-    const maxVal = Math.max(...allVals) * 1.05;
-
-    const getX = (index) => padding.left + (index / (data.length - 1)) * (width - padding.left - padding.right);
-    const getY = (val) => height - padding.bottom - ((val - minVal) / (maxVal - minVal)) * (height - padding.top - padding.bottom);
-
-    // Grid
-    ctx.strokeStyle = '#1f1f1f';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 5; i++) {
-      const v = minVal + (i / 5) * (maxVal - minVal);
-      const y = getY(v);
-      ctx.beginPath();
-      ctx.moveTo(padding.left, y);
-      ctx.lineTo(width - padding.right, y);
-      ctx.stroke();
-
-      ctx.fillStyle = '#666';
-      ctx.font = '10px Consolas, monospace';
-      ctx.fillText(v.toFixed(0), 10, y + 3);
-    }
-
-    // Benchmark (Cyan Dashed)
-    ctx.beginPath();
-    ctx.strokeStyle = '#00e5ff';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    data.forEach((d, i) => {
-      const x = getX(i);
-      const y = getY(d.benchmark);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Strategy Gradient Area
-    const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
-    gradient.addColorStop(0, 'rgba(255, 157, 0, 0.35)');
-    gradient.addColorStop(1, 'rgba(255, 157, 0, 0.0)');
-
-    ctx.beginPath();
-    data.forEach((d, i) => {
-      const x = getX(i);
-      const y = getY(d.nav);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.lineTo(getX(data.length - 1), height - padding.bottom);
-    ctx.lineTo(getX(0), height - padding.bottom);
-    ctx.closePath();
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    // Strategy NAV Line
-    ctx.beginPath();
-    ctx.strokeStyle = '#ff9d00';
-    ctx.lineWidth = 3;
-    data.forEach((d, i) => {
-      const x = getX(i);
-      const y = getY(d.nav);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-
-    // Points & Labels
-    data.forEach((d, i) => {
-      const x = getX(i);
-      const y = getY(d.nav);
-
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffb700';
-      ctx.fill();
-
-      ctx.fillStyle = '#999';
-      ctx.font = '10px Consolas, monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(d.date, x, height - 15);
-    });
-  }
-
-  // Timeframe selector buttons
-  document.querySelectorAll('.nav-tf-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.nav-tf-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeNavTf = btn.dataset.tf;
-      renderNavChart();
-    });
-  });
-
-  // 7. Interactive Strategy Backtest Simulator Engine
-  function runBacktestSimulator() {
-    const lookback = parseInt(document.getElementById('simLookback').value);
-    const leverage = parseInt(document.getElementById('simLeverage').value);
-    const stopLoss = parseFloat(document.getElementById('simStopLoss').value);
-    const stratType = document.getElementById('simStrategyType').value;
-
-    playBeep(1200, 0.08);
-
-    // Calculate synthetic metrics based on parameters
-    let baseSharpe = 2.4;
-    if (stratType === 'STAT_ARB') baseSharpe = 2.85;
-    if (stratType === 'MARKET_MAKING') baseSharpe = 3.12;
-    if (stratType === 'MOMENTUM') baseSharpe = 2.65;
-    if (stratType === 'VOL_ARB') baseSharpe = 2.95;
-
-    const calcSharpe = (baseSharpe * Math.sqrt(1 + (leverage * 0.1) - (stopLoss * 0.05))).toFixed(2);
-    const calcCagr = (18 + leverage * 6.5 - stopLoss * 1.2).toFixed(1);
-    const calcMaxDd = (-1.5 * leverage * (1 + stopLoss * 0.3)).toFixed(1);
-    const calcWinRate = (60 + Math.random() * 12).toFixed(1);
-
-    document.getElementById('simResultSharpe').innerText = calcSharpe;
-    document.getElementById('simResultCagr').innerText = `+${calcCagr}%`;
-    document.getElementById('simResultMaxDd').innerText = `${calcMaxDd}%`;
-    document.getElementById('simResultWinRate').innerText = `${calcWinRate}%`;
-
-    // Render Canvas Chart for Simulator
-    const canvas = document.getElementById('simChart');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    const width = canvas.width;
-    const height = canvas.height;
-    ctx.clearRect(0, 0, width, height);
-
-    // Generate synthetic random walk NAV points
-    const points = [];
-    let currentNav = 100;
-    for (let i = 0; i <= 30; i++) {
-      const ret = (Math.random() - 0.43) * 0.03 * leverage;
-      currentNav *= (1 + ret);
-      points.push(currentNav);
-    }
-
-    const minNav = Math.min(...points) * 0.98;
-    const maxNav = Math.max(...points) * 1.02;
-
-    const getX = (i) => 20 + (i / 30) * (width - 40);
-    const getY = (val) => height - 20 - ((val - minNav) / (maxNav - minNav)) * (height - 40);
-
-    ctx.beginPath();
-    ctx.strokeStyle = '#00ff66';
-    ctx.lineWidth = 2;
-    points.forEach((val, i) => {
-      const x = getX(i);
-      const y = getY(val);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(0, 255, 102, 0.15)';
-    ctx.lineTo(getX(30), height - 20);
-    ctx.lineTo(getX(0), height - 20);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  // Slider event listeners
-  const simLookback = document.getElementById('simLookback');
-  const simLeverage = document.getElementById('simLeverage');
-  const simStopLoss = document.getElementById('simStopLoss');
-  const btnRunSim = document.getElementById('btnRunSim');
-
-  if (simLookback) simLookback.addEventListener('input', (e) => document.getElementById('valLookback').innerText = `${e.target.value} Days`);
-  if (simLeverage) simLeverage.addEventListener('input', (e) => document.getElementById('valLeverage').innerText = `${e.target.value}x`);
-  if (simStopLoss) simStopLoss.addEventListener('input', (e) => document.getElementById('valStopLoss').innerText = `${e.target.value}%`);
-  if (btnRunSim) btnRunSim.addEventListener('click', runBacktestSimulator);
-
-  // 8. Tab Navigation
+  // 7. Tab Navigation
   window.switchTab = function(tabId) {
     playBeep(900, 0.04);
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -508,16 +309,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.tab-panel').forEach(panel => {
       panel.classList.toggle('active', panel.id === tabId);
     });
-
-    if (tabId === 'tab-perf') setTimeout(renderNavChart, 50);
-    if (tabId === 'tab-sim') setTimeout(runBacktestSimulator, 50);
   };
 
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  // 9. Command Line Parser
+  // 8. Command Line Parser
   const cliInput = document.getElementById('cliInput');
   const cliSubmit = document.getElementById('cliSubmit');
   const cliOutput = document.getElementById('cliOutput');
@@ -541,33 +339,36 @@ document.addEventListener('DOMContentLoaded', () => {
     logCliOutput(`EXEC: ${cmdRaw.toUpperCase()}`);
 
     switch (cmd) {
-      case 'help':
-      case '?':
+      case 'help': case '?':
         logCliOutput("AVAILABLE COMMANDS:");
-        logCliOutput("  1 or BIO       - Profile Overview");
-        logCliOutput("  2 or STRAT     - Quant Strategies & Alpha");
-        logCliOutput("  3 or TECH      - Tech Stack & Infrastructure");
-        logCliOutput("  4 or NAV       - Interactive NAV Equity Curve");
-        logCliOutput("  5 or EXP       - Experience & Education");
-        logCliOutput("  6 or MSG       - Contact & LinkedIn");
-        logCliOutput("  7 or L2        - Live WebSocket Order Book Depth");
-        logCliOutput("  8 or SIM       - Strategy Backtest Simulator");
-        logCliOutput("  CLEAR          - Clear terminal output");
+        logCliOutput("  1 or BIO       - Profile Overview & Research Philosophy");
+        logCliOutput("  2 or RES       - Core Quantitative Research & Methods");
+        logCliOutput("  3 or PROJ      - Real Quantitative Projects & Repos");
+        logCliOutput("  4 or TECH      - Quantitative Skills & Toolbox");
+        logCliOutput("  5 or CAREER    - WorldQuant & Education Timeline");
+        logCliOutput("  6 or L2        - Live WebSocket Order Book Depth");
+        logCliOutput("  7 or MSG       - Contact Channels & Dispatch");
+        logCliOutput("  CLEAR          - Clear terminal logs");
+        logCliOutput("  GIT            - Open GitHub (guangnn-161)");
         logCliOutput("  LINKEDIN       - Open LinkedIn Profile");
         logCliOutput("  SOUND          - Toggle Audio Feedback");
         break;
 
-      case '1': case 'bio': switchTab('tab-bio'); logCliOutput("LOADED: BIO PROFILE"); break;
-      case '2': case 'strat': switchTab('tab-strat'); logCliOutput("LOADED: STRATEGIES"); break;
-      case '3': case 'tech': switchTab('tab-skills'); logCliOutput("LOADED: TECH STACK"); break;
-      case '4': case 'nav': switchTab('tab-perf'); logCliOutput("LOADED: NAV CHART"); break;
-      case '5': case 'exp': switchTab('tab-exp'); logCliOutput("LOADED: EXPERIENCE"); break;
-      case '6': case 'msg': switchTab('tab-contact'); logCliOutput("LOADED: CONTACT"); break;
-      case '7': case 'l2': switchTab('tab-l2'); logCliOutput("LOADED: LIVE L2 ORDER BOOK"); break;
-      case '8': case 'sim': switchTab('tab-sim'); logCliOutput("LOADED: BACKTEST SIMULATOR"); break;
+      case '1': case 'bio': switchTab('tab-bio'); logCliOutput("LOADED: 1<GO> BIO PROFILE"); break;
+      case '2': case 'res': case 'strat': switchTab('tab-strat'); logCliOutput("LOADED: 2<GO> RESEARCH"); break;
+      case '3': case 'proj': case 'projects': switchTab('tab-projects'); logCliOutput("LOADED: 3<GO> REAL PROJECTS"); break;
+      case '4': case 'tech': case 'skills': switchTab('tab-skills'); logCliOutput("LOADED: 4<GO> TECH TOOLBOX"); break;
+      case '5': case 'career': case 'exp': switchTab('tab-exp'); logCliOutput("LOADED: 5<GO> CAREER TIMELINE"); break;
+      case '6': case 'l2': switchTab('tab-l2'); logCliOutput("LOADED: 6<GO> LIVE L2 ORDER BOOK"); break;
+      case '7': case 'msg': case 'contact': switchTab('tab-contact'); logCliOutput("LOADED: 7<GO> CONTACT DIRECTORY"); break;
 
       case 'clear': case 'cls':
         if (cliOutput) { cliOutput.innerHTML = ''; cliOutput.classList.remove('active'); }
+        break;
+
+      case 'git': case 'github':
+        window.open(PORTFOLIO_DATA.profile.github, '_blank');
+        logCliOutput("OPENING GITHUB REPO...");
         break;
 
       case 'linkedin':
@@ -609,17 +410,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Keyboard shortcut keys (F1-F8)
+  // Keyboard shortcut keys (F1-F7)
   window.addEventListener('keydown', (e) => {
     if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
     if (e.key === 'F1') { e.preventDefault(); switchTab('tab-bio'); }
     if (e.key === 'F2') { e.preventDefault(); switchTab('tab-strat'); }
-    if (e.key === 'F3') { e.preventDefault(); switchTab('tab-skills'); }
-    if (e.key === 'F4') { e.preventDefault(); switchTab('tab-perf'); }
+    if (e.key === 'F3') { e.preventDefault(); switchTab('tab-projects'); }
+    if (e.key === 'F4') { e.preventDefault(); switchTab('tab-skills'); }
     if (e.key === 'F5') { e.preventDefault(); switchTab('tab-exp'); }
-    if (e.key === 'F6') { e.preventDefault(); switchTab('tab-contact'); }
-    if (e.key === 'F7') { e.preventDefault(); switchTab('tab-l2'); }
-    if (e.key === 'F8') { e.preventDefault(); switchTab('tab-sim'); }
+    if (e.key === 'F6') { e.preventDefault(); switchTab('tab-l2'); }
+    if (e.key === 'F7') { e.preventDefault(); switchTab('tab-contact'); }
   });
 
   window.sendTerminalMessage = function() {
@@ -629,23 +429,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (name && body) {
       playBeep(1400, 0.1);
-      if (status) status.innerHTML = `✅ MSG SENT TO NQ TRADER DESK. (Simulated broadcast)`;
-      logCliOutput(`DISPATCH: Message sent from ${name}`);
+      if (status) status.innerHTML = `✅ MSG SENT TO QUANG NGUYEN DESK. (Simulated broadcast)`;
+      logCliOutput(`DISPATCH: Message from ${name}`);
       document.getElementById('msgName').value = '';
       document.getElementById('msgBody').value = '';
     }
   };
-
-  window.addEventListener('resize', () => {
-    const activeTab = document.querySelector('.tab-panel.active');
-    if (activeTab && activeTab.id === 'tab-perf') renderNavChart();
-    if (activeTab && activeTab.id === 'tab-sim') runBacktestSimulator();
-  });
 
   // Init sequence
   initProfile();
   renderTickerTrack();
   initLiveTickerWebsocket();
   initLiveL2OrderBook();
+  initProjects();
   initContent();
 });

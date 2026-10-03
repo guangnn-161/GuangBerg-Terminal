@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLOOMBERG ADMIN TERMINAL | Quang Nguyen</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body style="padding: 20px; max-width: 1000px; margin: 0 auto; background: #050505;">
+
+  <div class="top-bar" style="margin-bottom: 20px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span class="brand-title">ADMIN TERMINAL</span>
+      <span style="color: var(--white); font-weight: bold;">OWNER CONSOLE &lt;AUTH&gt;</span>
+    </div>
+    <div>
+      <a href="index.html" class="bloomberg-link">&larr; BACK TO PUBLIC TERMINAL</a>
+    </div>
+  </div>
+
+  <!-- AUTH SECTION -->
+  <div id="authSection" class="panel-box" style="margin-bottom: 20px;">
+    <div class="panel-header">
+      <span>AUTHENTICATION REQUIRED &lt;OWNER LOGIN&gt;</span>
+      <span style="color: var(--amber);" id="authStatus">LOCKED</span>
+    </div>
+
+    <form id="loginForm" onsubmit="event.preventDefault(); window.loginAdmin();" style="display: flex; flex-direction: column; gap: 10px; max-width: 400px;">
+      <input type="email" id="loginEmail" placeholder="Owner Email..." style="background: #111; border: 1px solid #333; color: var(--white); padding: 8px; font-family: var(--font-mono);" required>
+      <input type="password" id="loginPass" placeholder="Password..." style="background: #111; border: 1px solid #333; color: var(--white); padding: 8px; font-family: var(--font-mono);" required>
+      <button type="submit" class="action-btn">LOGIN AS OWNER &lt;GO&gt;</button>
+    </form>
+  </div>
+
+  <!-- ADMIN DASHBOARD (HIDDEN UNTIL AUTH) -->
+  <div id="adminDashboard" style="display: none; flex-direction: column; gap: 20px;">
+    
+    <div class="panel-box">
+      <div class="panel-header">
+        <span>SESSION ACTIVE</span>
+        <button onclick="window.logoutAdmin();" class="action-btn" style="padding: 2px 8px; font-size: 11px; background: var(--red); color: #fff;">LOGOUT</button>
+      </div>
+      <p style="color: var(--green); font-size: 13px;">
+        ✅ Đã xác thực quyền Chủ sở hữu (Owner). Các thay đổi qua giao diện này sẽ được đồng bộ trực tiếp tới cơ sở dữ liệu Supabase và cập nhật Realtime trên trang chính.
+      </p>
+    </div>
+
+    <!-- UPDATE STATUS & BIO -->
+    <div class="panel-box">
+      <div class="panel-header">
+        <span>QUICK STATUS UPDATE</span>
+        <span style="color: var(--cyan);">PROFILE SYNC</span>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="action-btn" onclick="window.updateStatus('OPEN TO WORK')">SET STATUS: OPEN TO WORK</button>
+        <button class="action-btn" onclick="window.updateStatus('ACTIVE / RESEARCHING')">SET STATUS: ACTIVE RESEARCH</button>
+        <button class="action-btn" onclick="window.updateStatus('BUSY')">SET STATUS: BUSY</button>
+      </div>
+      <div id="statusResult" style="color: var(--green); margin-top: 10px; font-size: 12px;"></div>
+    </div>
+
+    <!-- INBOX MESSAGES -->
+    <div class="panel-box">
+      <div class="panel-header">
+        <span>TERMINAL INBOX MESSAGES</span>
+        <span style="color: var(--amber);" id="inboxCount">0 MESSAGES</span>
+      </div>
+
+      <div id="messagesList" style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+        <div style="color: var(--gray-light);">Đang tải tin nhắn...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let sb = null;
+    if (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_URL && !window.APP_CONFIG.SUPABASE_URL.includes("your-project-id")) {
+      sb = supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
+    }
+
+    async function checkSession() {
+      if (!sb) {
+        document.getElementById('authStatus').innerText = "VUI LÒNG CẤU HÌNH SUPABASE TRONG config.js";
+        return;
+      }
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('adminDashboard').style.display = 'flex';
+        loadMessages();
+      }
+    }
+
+    window.loginAdmin = async function() {
+      if (!sb) return alert("Vui lòng nhập SUPABASE_URL và SUPABASE_ANON_KEY trong file config.js trước!");
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPass').value;
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) return alert("Đăng nhập thất bại: " + error.message);
+      location.reload();
+    };
+
+    window.logoutAdmin = async function() {
+      if (sb) await sb.auth.signOut();
+      location.reload();
+    };
+
+    window.updateStatus = async function(newStatus) {
+      if (!sb) return;
+      const { error } = await sb.from('profile').update({ status: newStatus }).eq('id', 1);
+      const resEl = document.getElementById('statusResult');
+      if (error) {
+        resEl.style.color = "var(--red)";
+        resEl.innerText = "Lỗi cập nhật: " + error.message;
+      } else {
+        resEl.style.color = "var(--green)";
+        resEl.innerText = "Đã cập nhật trạng thái thành: " + newStatus;
+      }
+    };
+
+    async function loadMessages() {
+      if (!sb) return;
+      const { data, error } = await sb.from('messages').select('*').order('created_at', { ascending: false });
+      const container = document.getElementById('messagesList');
+      if (error || !data || data.length === 0) {
+        container.innerHTML = `<div style="color: var(--gray-light);">Chưa có tin nhắn mới nào trong hộp thư.</div>`;
+        return;
+      }
+      document.getElementById('inboxCount').innerText = `${data.length} MESSAGES`;
+      container.innerHTML = data.map(m => `
+        <div style="background: #111; border: 1px solid #333; padding: 10px;">
+          <div style="display: flex; justify-content: space-between; color: var(--amber-bright); margin-bottom: 5px;">
+            <strong>${m.sender}</strong>
+            <span style="font-size: 11px; color: var(--gray-light);">${new Date(m.created_at).toLocaleString('vi-VN')}</span>
+          </div>
+          <div style="color: var(--white);">${m.body}</div>
+        </div>
+      `).join('');
+    }
+
+    checkSession();
+  </script>
+</body>
+</html>
