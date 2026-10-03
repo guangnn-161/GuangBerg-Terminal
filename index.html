@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BLOOMBERG TERMINAL | Nhật Quang Nguyễn (Quant Trader)</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Favicon / Meta -->
-  <meta name="description" content="Portfolio của Nhật Quang Nguyễn - Quantitative Trader & Researcher. Giao diện Bloomberg Terminal.">
+  <meta name="description" content="Portfolio của Nhật Quang Nguyễn - Quantitative Trader & Researcher. Giao diện Bloomberg Terminal Live WebSocket & Interactive Backtest Engine.">
 </head>
 <body>
 
@@ -22,18 +21,18 @@
       </div>
 
       <div class="system-status">
-        <div class="status-badge">
+        <div class="status-badge" id="wsStatusBadge">
           <span class="status-dot"></span>
-          <span>SYSTEM ONLINE</span>
+          <span id="wsStatusText">WEBSOCKET LIVE</span>
         </div>
         <div class="top-clock" id="topClock">UTC 00:00:00</div>
       </div>
     </header>
 
-    <!-- LIVE TICKER MARQUEE BAR -->
+    <!-- LIVE WEBSOCKET TICKER MARQUEE BAR -->
     <div class="ticker-bar">
       <div class="ticker-track" id="tickerTrack">
-        <!-- Dynamically rendered by app.js from data.js -->
+        <!-- Live stream via app.js -->
       </div>
     </div>
 
@@ -56,6 +55,12 @@
       </button>
       <button class="nav-btn" data-tab="tab-contact">
         <span class="fn-key">F6</span> 6&lt;GO&gt; MSG
+      </button>
+      <button class="nav-btn" data-tab="tab-l2">
+        <span class="fn-key">F7</span> 7&lt;GO&gt; LIVE L2
+      </button>
+      <button class="nav-btn" data-tab="tab-sim">
+        <span class="fn-key">F8</span> 8&lt;GO&gt; BACKTEST
       </button>
     </nav>
 
@@ -97,8 +102,8 @@
                   <td style="color: var(--white); text-align: right;">Data-Driven & Risk-First Alpha</td>
                 </tr>
                 <tr>
-                  <td style="color: var(--gray-light); padding: 4px 0;">Execution Engine:</td>
-                  <td style="color: var(--green); text-align: right;">C++ / Python Automated Async</td>
+                  <td style="color: var(--gray-light); padding: 4px 0;">Live Market Feed:</td>
+                  <td style="color: var(--green); text-align: right;">Binance WebSocket Live Stream</td>
                 </tr>
                 <tr>
                   <td style="color: var(--gray-light); padding: 4px 0;">Location:</td>
@@ -167,7 +172,7 @@
               </h3>
               <div id="skillsLanguages" class="tag-list" style="margin-bottom: 15px;"></div>
 
-              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-margin-top: 15px; margin-bottom: 10px;">
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px;">
                 LIBRARIES & FRAMEWORKS
               </h3>
               <div id="skillsLibraries" class="tag-list"></div>
@@ -196,7 +201,12 @@
               <span class="panel-tag">NAV &lt;GO&gt;</span>
               <span>HISTORICAL NET ASSET VALUE (NAV) EQUITY CURVE</span>
             </span>
-            <span style="color: var(--green);">CUMULATIVE RETURN</span>
+            <div style="display: flex; gap: 6px;">
+              <button class="nav-tf-btn active" data-tf="ALL">ALL</button>
+              <button class="nav-tf-btn" data-tf="1Y">1Y</button>
+              <button class="nav-tf-btn" data-tf="3M">3M</button>
+              <button class="nav-tf-btn" data-tf="1M">1M</button>
+            </div>
           </div>
 
           <div class="chart-container">
@@ -209,7 +219,7 @@
               <span style="color: var(--cyan); font-weight: bold;">■ Market Benchmark</span>
             </div>
             <div style="font-size: 12px; color: var(--gray-light);">
-              Click/Hover chart points to view historical quarterly NAV value.
+              Select timeframe (1M, 3M, 1Y, ALL) to view performance breakdowns.
             </div>
           </div>
         </div>
@@ -274,8 +284,8 @@
 
                 <div>
                   <div style="color: var(--gray-light); font-size: 12px;">GITHUB:</div>
-                  <a href="https://github.com/" target="_blank" class="bloomberg-link" id="contactGithub">
-                    https://github.com/
+                  <a href="https://github.com/guangnn-161" target="_blank" class="bloomberg-link" id="contactGithub">
+                    https://github.com/guangnn-161
                   </a>
                 </div>
               </div>
@@ -284,7 +294,7 @@
             <div style="background-color: #000; border: 1px solid var(--amber-dim); padding: 15px;">
               <h3 style="color: var(--amber-bright); margin-bottom: 10px;">QUICK MSG TO TRADER</h3>
               <p style="color: var(--gray-light); font-size: 12px; margin-bottom: 10px;">
-                Bạn có thể gửi tin nhắn giả lập trực tiếp qua Terminal.
+                Gửi tin nhắn trực tiếp qua Terminal.
               </p>
               
               <form id="msgForm" onsubmit="event.preventDefault(); window.sendTerminalMessage();">
@@ -293,6 +303,164 @@
                 <button type="submit" class="action-btn" style="width: 100%;">SEND MESSAGE &lt;GO&gt;</button>
               </form>
               <div id="msgStatus" style="color: var(--green); margin-top: 8px; font-size: 12px;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: REAL-TIME L2 ORDER BOOK VISUALIZER -->
+      <section class="tab-panel" id="tab-l2">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">L2 &lt;GO&gt;</span>
+              <span>LIVE WEBSOCKET ORDER BOOK DEPTH (BTC/USDT)</span>
+            </span>
+            <span style="color: var(--green);" id="l2Status">WEBSOCKET STREAMING</span>
+          </div>
+
+          <div class="grid-2">
+            <!-- Asks (Sells) & Bids (Buys) -->
+            <div style="background: #000; border: 1px solid #222; padding: 12px;">
+              <div style="color: var(--red); font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                <span>ASK PRICE (SELLS)</span>
+                <span>SIZE</span>
+              </div>
+              <div id="l2Asks" style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+                <!-- Realtime asks -->
+              </div>
+
+              <div style="margin: 12px 0; padding: 6px; background: #111; text-align: center; font-weight: bold; border-top: 1px solid #333; border-bottom: 1px solid #333;">
+                <span style="color: var(--white);">LAST PRICE: </span>
+                <span style="color: var(--amber-bright); font-size: 16px;" id="l2LastPrice">92,450.00</span>
+                <span style="color: var(--cyan); font-size: 12px; margin-left: 10px;" id="l2Ofi">OFI: +0.42</span>
+              </div>
+
+              <div style="color: var(--green); font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                <span>BID PRICE (BUYS)</span>
+                <span>SIZE</span>
+              </div>
+              <div id="l2Bids" style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+                <!-- Realtime bids -->
+              </div>
+            </div>
+
+            <!-- Depth Ladder Visualizer Chart -->
+            <div style="background: #000; border: 1px solid #222; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <h3 style="color: var(--amber-bright); margin-bottom: 10px;">ORDER FLOW IMBALANCE (OFI) ENGINE</h3>
+                <p style="color: var(--gray-light); font-size: 12px; line-height: 1.5; margin-bottom: 15px;">
+                  Bảng hiển thị thanh khoản Order Book L2 thời gian thực được kết nối trực tiếp với <strong>Binance Public WebSocket Stream</strong>.
+                </p>
+
+                <div style="background: #0a0a0a; border: 1px solid #333; padding: 10px; margin-bottom: 15px;">
+                  <div style="font-size: 11px; color: #888;">BUY/SELL PRESSURE RATIO:</div>
+                  <div style="height: 18px; background: #222; margin-top: 5px; position: relative; overflow: hidden; display: flex;">
+                    <div id="bidBarRatio" style="width: 55%; background: var(--green); height: 100%;"></div>
+                    <div id="askBarRatio" style="width: 45%; background: var(--red); height: 100%;"></div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 4px;">
+                    <span style="color: var(--green);" id="bidPercentText">BIDS: 55%</span>
+                    <span style="color: var(--red);" id="askPercentText">ASKS: 45%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align: center; border-top: 1px dashed #333; padding-top: 10px;">
+                <button class="action-btn" onclick="window.switchTab('tab-sim')">RUN STRATEGY SIMULATOR &lt;GO&gt;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 8: INTERACTIVE STRATEGY BACKTEST SIMULATOR -->
+      <section class="tab-panel" id="tab-sim">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">SIM &lt;GO&gt;</span>
+              <span>INTERACTIVE QUANT STRATEGY BACKTEST SIMULATOR</span>
+            </span>
+            <span style="color: var(--cyan);">LIVE PARAMETER ENGINE</span>
+          </div>
+
+          <div class="grid-2">
+            <!-- Controls -->
+            <div style="background: #000; border: 1px solid var(--amber-dim); padding: 15px;">
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 15px;">
+                STRATEGY PARAMETERS
+              </h3>
+
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="color: var(--white); font-size: 12px; display: block; margin-bottom: 4px;">STRATEGY TYPE:</label>
+                  <select id="simStrategyType" style="width: 100%; background: #111; color: var(--amber); border: 1px solid #333; padding: 6px; font-family: var(--font-mono);">
+                    <option value="STAT_ARB">Statistical Arbitrage & Cointegration</option>
+                    <option value="MARKET_MAKING">Avellaneda-Stoikov Market Making</option>
+                    <option value="MOMENTUM">ML Order Flow Imbalance Momentum</option>
+                    <option value="VOL_ARB">Volatility Surface Delta-Neutral</option>
+                  </select>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-light);">
+                    <span>LOOKBACK PERIOD (DAYS):</span>
+                    <span style="color: var(--cyan);" id="valLookback">60 Days</span>
+                  </div>
+                  <input type="range" id="simLookback" min="10" max="180" value="60" style="width: 100%; accent-color: var(--amber);">
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-light);">
+                    <span>LEVERAGE / EXPOSURE:</span>
+                    <span style="color: var(--cyan);" id="valLeverage">3x</span>
+                  </div>
+                  <input type="range" id="simLeverage" min="1" max="10" value="3" style="width: 100%; accent-color: var(--amber);">
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-light);">
+                    <span>STOP LOSS TARGET (%):</span>
+                    <span style="color: var(--cyan);" id="valStopLoss">2.0%</span>
+                  </div>
+                  <input type="range" id="simStopLoss" min="0.5" max="5.0" step="0.5" value="2.0" style="width: 100%; accent-color: var(--amber);">
+                </div>
+
+                <button class="action-btn" id="btnRunSim" style="width: 100%; margin-top: 10px;">
+                  ⚡ EXECUTE BACKTEST &lt;SIMULATE&gt;
+                </button>
+              </div>
+            </div>
+
+            <!-- Simulated Results -->
+            <div style="background: #000; border: 1px solid var(--amber-dim); padding: 15px; display: flex; flex-direction: column;">
+              <h3 style="color: var(--green); border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 15px;">
+                SIMULATED BACKTEST RESULTS
+              </h3>
+
+              <div class="grid-2" style="margin-bottom: 15px;">
+                <div class="metric-card">
+                  <div class="label">ESTIMATED SHARPE</div>
+                  <div class="value green" id="simResultSharpe">2.92</div>
+                </div>
+                <div class="metric-card">
+                  <div class="label">ESTIMATED CAGR</div>
+                  <div class="value amber" id="simResultCagr">+38.5%</div>
+                </div>
+                <div class="metric-card">
+                  <div class="label">MAX DRAWDOWN</div>
+                  <div class="value green" id="simResultMaxDd">-3.8%</div>
+                </div>
+                <div class="metric-card">
+                  <div class="label">WIN RATE</div>
+                  <div class="value cyan" id="simResultWinRate">69.2%</div>
+                </div>
+              </div>
+
+              <div style="flex: 1; min-height: 180px; position: relative; background: #020202; border: 1px solid #222;">
+                <canvas id="simChart" style="width: 100%; height: 100%; display: block;"></canvas>
+              </div>
             </div>
           </div>
         </div>
@@ -307,7 +475,7 @@
     <div class="cli-bar">
       <span class="cli-prompt">NQ-QUANT&gt;</span>
       <div class="cli-input-wrapper">
-        <input type="text" class="cli-input" id="cliInput" placeholder="Enter command (e.g. HELP, BIO, STRAT, SKILLS, PERF, CONTACT, CLEAR) <GO>" autocomplete="off">
+        <input type="text" class="cli-input" id="cliInput" placeholder="Enter command (e.g. HELP, BIO, STRAT, NAV, L2, SIM, CLEAR) <GO>" autocomplete="off">
       </div>
       <button class="cli-btn" id="cliSubmit">GO</button>
     </div>

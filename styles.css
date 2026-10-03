@@ -35,7 +35,7 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Retro CRT Overlay (Optional) */
+/* Retro CRT Overlay */
 .crt-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -125,7 +125,7 @@ html, body {
 .ticker-track {
   display: inline-flex;
   gap: 25px;
-  animation: tickerScroll 30s linear infinite;
+  animation: tickerScroll 35s linear infinite;
 }
 
 .ticker-track:hover {
@@ -174,28 +174,28 @@ html, body {
 
 .nav-btn {
   flex: 1;
-  min-width: 130px;
+  min-width: 110px;
   background-color: #121212;
   color: var(--amber);
   border: none;
   border-right: 1px solid #222;
-  padding: 10px 12px;
+  padding: 10px 10px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   text-align: left;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .nav-btn .fn-key {
   color: #000;
   background-color: var(--amber);
-  padding: 1px 5px;
-  font-size: 11px;
+  padding: 1px 4px;
+  font-size: 10px;
   border-radius: 2px;
 }
 
@@ -268,6 +268,22 @@ html, body {
   background-color: var(--cyan);
   font-size: 10px;
   padding: 1px 4px;
+  font-weight: bold;
+}
+
+.nav-tf-btn {
+  background: #111;
+  color: var(--amber);
+  border: 1px solid #333;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+.nav-tf-btn.active {
+  background: var(--amber);
+  color: #000;
   font-weight: bold;
 }
 
@@ -454,6 +470,7 @@ canvas#navChart {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   transition: all 0.2s ease;
 }

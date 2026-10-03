@@ -1,7 +1,6 @@
 /**
  * PORTFOLIO DATA CONFIGURATION - NHẬT QUANG NGUYỄN (QUANT TRADER)
- * 
- * Bạn có thể dễ dàng chỉnh sửa các thông tin bên dưới để cập nhật nội dung trên website.
+ * Bloomberg Terminal Live & Interactive Edition
  */
 
 const PORTFOLIO_DATA = {
@@ -12,7 +11,7 @@ const PORTFOLIO_DATA = {
     status: "ACTIVE / TRADING",
     location: "Vietnam / Remote",
     linkedin: "https://www.linkedin.com/in/nh%E1%BA%ADt-quang-nguy%E1%BB%85n-962499391/",
-    github: "https://github.com/",
+    github: "https://github.com/guangnn-161",
     email: "contact@nhatquang-quant.com",
     bio: [
       "Quant Trader chuyên xây dựng, kiểm thử (backtest) và triển khai các thuật toán giao dịch tự động trên thị trường Tài chính & Crypto.",
@@ -21,7 +20,7 @@ const PORTFOLIO_DATA = {
     ]
   },
 
-  // Chỉ số hiệu suất tổng quan (Key Performance Metrics)
+  // Key performance metrics
   metrics: {
     sharpeRatio: "2.85",
     sortinoRatio: "3.42",
@@ -33,24 +32,50 @@ const PORTFOLIO_DATA = {
     executionLatency: "< 4.2ms"
   },
 
-  // Dữ liệu đường cong lợi nhuận NAV (dùng vẽ biểu đồ Canvas)
-  navData: [
-    { date: "2023-Q1", nav: 100.0, benchmark: 100.0 },
-    { date: "2023-Q2", nav: 108.4, benchmark: 102.1 },
-    { date: "2023-Q3", nav: 114.2, benchmark: 101.5 },
-    { date: "2023-Q4", nav: 122.9, benchmark: 107.8 },
-    { date: "2024-Q1", nav: 135.1, benchmark: 114.2 },
-    { date: "2024-Q2", nav: 141.0, benchmark: 112.9 },
-    { date: "2024-Q3", nav: 149.8, benchmark: 118.4 },
-    { date: "2024-Q4", nav: 162.3, benchmark: 124.0 },
-    { date: "2025-Q1", nav: 174.5, benchmark: 128.6 },
-    { date: "2025-Q2", nav: 188.2, benchmark: 131.2 },
-    { date: "2025-Q3", nav: 196.4, benchmark: 135.0 },
-    { date: "2025-Q4", nav: 212.8, benchmark: 139.8 },
-    { date: "2026-Q1", nav: 228.6, benchmark: 142.5 }
-  ],
+  // NAV Historical Data with timeframe splits (1M, 3M, 6M, 1Y, ALL)
+  navData: {
+    "1M": [
+      { date: "Day 1", nav: 218.0, benchmark: 138.0 },
+      { date: "Day 5", nav: 220.5, benchmark: 139.2 },
+      { date: "Day 10", nav: 222.1, benchmark: 139.8 },
+      { date: "Day 15", nav: 224.8, benchmark: 140.5 },
+      { date: "Day 20", nav: 226.2, benchmark: 141.2 },
+      { date: "Day 25", nav: 227.4, benchmark: 141.9 },
+      { date: "Day 30", nav: 228.6, benchmark: 142.5 }
+    ],
+    "3M": [
+      { date: "2025-W48", nav: 205.0, benchmark: 137.0 },
+      { date: "2025-W50", nav: 212.8, benchmark: 139.8 },
+      { date: "2026-W02", nav: 218.4, benchmark: 140.2 },
+      { date: "2026-W04", nav: 222.1, benchmark: 141.0 },
+      { date: "2026-W06", nav: 225.8, benchmark: 141.8 },
+      { date: "2026-W08", nav: 228.6, benchmark: 142.5 }
+    ],
+    "1Y": [
+      { date: "2025-Q1", nav: 174.5, benchmark: 128.6 },
+      { date: "2025-Q2", nav: 188.2, benchmark: 131.2 },
+      { date: "2025-Q3", nav: 196.4, benchmark: 135.0 },
+      { date: "2025-Q4", nav: 212.8, benchmark: 139.8 },
+      { date: "2026-Q1", nav: 228.6, benchmark: 142.5 }
+    ],
+    "ALL": [
+      { date: "2023-Q1", nav: 100.0, benchmark: 100.0 },
+      { date: "2023-Q2", nav: 108.4, benchmark: 102.1 },
+      { date: "2023-Q3", nav: 114.2, benchmark: 101.5 },
+      { date: "2023-Q4", nav: 122.9, benchmark: 107.8 },
+      { date: "2024-Q1", nav: 135.1, benchmark: 114.2 },
+      { date: "2024-Q2", nav: 141.0, benchmark: 112.9 },
+      { date: "2024-Q3", nav: 149.8, benchmark: 118.4 },
+      { date: "2024-Q4", nav: 162.3, benchmark: 124.0 },
+      { date: "2025-Q1", nav: 174.5, benchmark: 128.6 },
+      { date: "2025-Q2", nav: 188.2, benchmark: 131.2 },
+      { date: "2025-Q3", nav: 196.4, benchmark: 135.0 },
+      { date: "2025-Q4", nav: 212.8, benchmark: 139.8 },
+      { date: "2026-Q1", nav: 228.6, benchmark: 142.5 }
+    ]
+  },
 
-  // Các chiến lược giao dịch cốt lõi (Core Strategies)
+  // Strategies
   strategies: [
     {
       code: "STAT-ARB",
@@ -82,7 +107,7 @@ const PORTFOLIO_DATA = {
     }
   ],
 
-  // Kỹ năng & Công nghệ (Tech Stack)
+  // Skills
   skills: {
     languages: ["Python (Advanced)", "C++ 20", "SQL", "Rust", "Q / KDB+"],
     libraries: ["PyTorch", "NumPy", "pandas", "SciPy", "statsmodels", "Polars", "LightGBM"],
@@ -90,7 +115,7 @@ const PORTFOLIO_DATA = {
     tradingPlatforms: ["Interactive Brokers (IBKR API)", "CCXT", "Binance API", "Deribit API", "MetaTrader 5", "QuantConnect"]
   },
 
-  // Kinh nghiệm làm việc & Học vấn
+  // Timeline
   experience: [
     {
       period: "2023 - PRESENT",
@@ -123,15 +148,14 @@ const PORTFOLIO_DATA = {
     }
   ],
 
-  // Ticker thị trường mô phỏng (Live Simulated Ticker Bar)
-  tickers: [
-    { symbol: "BTC/USD", price: 92450.00, change: "+3.42%", dir: "up" },
-    { symbol: "ETH/USD", price: 3480.50, change: "+2.15%", dir: "up" },
-    { symbol: "S&P 500", price: 5820.10, change: "-0.35%", dir: "down" },
-    { symbol: "NQ-NAV", price: 228.60, change: "+12.4%", dir: "up" },
-    { symbol: "ALPHA-S1", price: 1.842, change: "+0.88%", dir: "up" },
-    { symbol: "SHARPE", price: 2.85, change: "STABLE", dir: "neutral" },
-    { symbol: "MAX-DD", price: -4.12, change: "SAFE", dir: "up" },
-    { symbol: "LATENCY", price: 4.18, change: "ms", dir: "neutral" }
+  // Live WebSocket pairs configuration
+  liveSymbols: [
+    { symbol: "BTC/USDT", wsStream: "btcusdt@ticker", price: 92450.00, change: "+0.00%", dir: "neutral", isLive: true },
+    { symbol: "ETH/USDT", wsStream: "ethusdt@ticker", price: 3480.50, change: "+0.00%", dir: "neutral", isLive: true },
+    { symbol: "SOL/USDT", wsStream: "solusdt@ticker", price: 195.20, change: "+0.00%", dir: "neutral", isLive: true },
+    { symbol: "BNB/USDT", wsStream: "bnbusdt@ticker", price: 610.40, change: "+0.00%", dir: "neutral", isLive: true },
+    { symbol: "NQ-NAV", wsStream: null, price: 228.60, change: "+12.4%", dir: "up", isLive: false },
+    { symbol: "SHARPE", wsStream: null, price: 2.85, change: "STABLE", dir: "neutral", isLive: false },
+    { symbol: "LATENCY", wsStream: null, price: 4.18, change: "ms", dir: "neutral", isLive: false }
   ]
 };
