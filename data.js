@@ -97,7 +97,7 @@ const PORTFOLIO_DATA = {
     languages: ["Python (Core)", "SQL", "TypeScript"],
     libraries: ["Pandas", "NumPy", "scikit-learn (sklearn)", "Matplotlib"],
     domains: ["Financial Modeling", "Econometrics", "Evolutionary Algorithms", "Time Series Analysis"],
-    platforms: ["WorldQuant BRAIN Platform", "MetaTrader 5 (MT5)", "GitHub", "Harness (CI/CD)"]
+    platforms: ["WorldQuant BRAIN Platform", "MetaTrader 5 (MT5)", "GitHub"]
   },
 
   // Kinh nghiệm làm việc thực tế
