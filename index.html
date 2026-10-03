@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLOOMBERG TERMINAL | Nhật Quang Nguyễn (Quant Trader)</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Favicon / Meta -->
+  <meta name="description" content="Portfolio của Nhật Quang Nguyễn - Quantitative Trader & Researcher. Giao diện Bloomberg Terminal.">
+</head>
+<body>
+
+  <!-- Optional CRT Scanline Retro Effect -->
+  <div class="crt-overlay" id="crtOverlay"></div>
+
+  <div id="app">
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="brand-title">BLOOMBERG TERMINAL</span>
+        <span style="color: var(--white); font-weight: bold;">NQ-QUANT &lt;EQUITY&gt;</span>
+      </div>
+
+      <div class="system-status">
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span>SYSTEM ONLINE</span>
+        </div>
+        <div class="top-clock" id="topClock">UTC 00:00:00</div>
+      </div>
+    </header>
+
+    <!-- LIVE TICKER MARQUEE BAR -->
+    <div class="ticker-bar">
+      <div class="ticker-track" id="tickerTrack">
+        <!-- Dynamically rendered by app.js from data.js -->
+      </div>
+    </div>
+
+    <!-- BLOOMBERG FUNCTION KEYS NAVIGATION -->
+    <nav class="nav-bar">
+      <button class="nav-btn active" data-tab="tab-bio">
+        <span class="fn-key">F1</span> 1&lt;GO&gt; BIO
+      </button>
+      <button class="nav-btn" data-tab="tab-strat">
+        <span class="fn-key">F2</span> 2&lt;GO&gt; STRAT
+      </button>
+      <button class="nav-btn" data-tab="tab-skills">
+        <span class="fn-key">F3</span> 3&lt;GO&gt; TECH
+      </button>
+      <button class="nav-btn" data-tab="tab-perf">
+        <span class="fn-key">F4</span> 4&lt;GO&gt; NAV
+      </button>
+      <button class="nav-btn" data-tab="tab-exp">
+        <span class="fn-key">F5</span> 5&lt;GO&gt; EXP
+      </button>
+      <button class="nav-btn" data-tab="tab-contact">
+        <span class="fn-key">F6</span> 6&lt;GO&gt; MSG
+      </button>
+    </nav>
+
+    <!-- MAIN TERMINAL CONTENT DISPLAY AREA -->
+    <main class="main-content">
+
+      <!-- TAB 1: BIO & SUMMARY -->
+      <section class="tab-panel active" id="tab-bio">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">GP &lt;GO&gt;</span>
+              <span>QUANTITATIVE RESEARCHER & TRADER PROFILE</span>
+            </span>
+            <span style="color: var(--cyan);" id="profileTicker">NQ-QUANT</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="color: var(--white); font-size: 22px; margin-bottom: 5px;" id="userName">NHẬT QUANG NGUYỄN</h2>
+              <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px;" id="userTitle">QUANTITATIVE TRADER</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 10px;" id="userBio">
+                <!-- Data injected from data.js -->
+              </div>
+            </div>
+
+            <div style="background-color: #000; border: 1px solid var(--amber-dim); padding: 15px;">
+              <div style="color: var(--amber-bright); font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px;">
+                TRADING DESK OVERVIEW
+              </div>
+              <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                <tr>
+                  <td style="color: var(--gray-light); padding: 4px 0;">Primary Asset Classes:</td>
+                  <td style="color: var(--white); text-align: right;">Crypto Perps, Equities, Futures</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--gray-light); padding: 4px 0;">Core Philosophy:</td>
+                  <td style="color: var(--white); text-align: right;">Data-Driven & Risk-First Alpha</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--gray-light); padding: 4px 0;">Execution Engine:</td>
+                  <td style="color: var(--green); text-align: right;">C++ / Python Automated Async</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--gray-light); padding: 4px 0;">Location:</td>
+                  <td style="color: var(--cyan); text-align: right;" id="userLocation">Vietnam / Remote</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--gray-light); padding: 4px 0;">Status:</td>
+                  <td style="color: var(--green); font-weight: bold; text-align: right;" id="userStatus">ACTIVE / TRADING</td>
+                </tr>
+              </table>
+
+              <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #333; text-align: center;">
+                <a href="https://www.linkedin.com/in/nh%E1%BA%ADt-quang-nguy%E1%BB%85n-962499391/" target="_blank" class="action-btn">
+                  🔗 VIEW LINKEDIN PROFILE &lt;GO&gt;
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK PERFORMANCE SUMMARY PANEL -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <span>KEY STRATEGY METRICS &lt;SUMMARY&gt;</span>
+            <span style="color: var(--green);">BENCHMARK: OUTPERFORM</span>
+          </div>
+
+          <div class="grid-4" id="quickMetrics">
+            <!-- Injected via app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: QUANT STRATEGIES -->
+      <section class="tab-panel" id="tab-strat">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">DES &lt;GO&gt;</span>
+              <span>QUANTITATIVE STRATEGIES & ALPHA MODELS</span>
+            </span>
+            <span style="color: var(--cyan);">SYSTEMATIC PORTFOLIO</span>
+          </div>
+
+          <div class="grid-2" id="strategyList">
+            <!-- Injected via app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: TECH STACK & TOOLS -->
+      <section class="tab-panel" id="tab-skills">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">TECH &lt;GO&gt;</span>
+              <span>QUANTITATIVE INFRASTRUCTURE & TECH STACK</span>
+            </span>
+            <span style="color: var(--cyan);">HIGH FREQUENCY & DATA ENGINE</span>
+          </div>
+
+          <div class="grid-2">
+            <div style="background-color: #0a0a0a; border: 1px solid #222; padding: 15px;">
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px;">
+                PROGRAMMING LANGUAGES & QUANT DB
+              </h3>
+              <div id="skillsLanguages" class="tag-list" style="margin-bottom: 15px;"></div>
+
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-margin-top: 15px; margin-bottom: 10px;">
+                LIBRARIES & FRAMEWORKS
+              </h3>
+              <div id="skillsLibraries" class="tag-list"></div>
+            </div>
+
+            <div style="background-color: #0a0a0a; border: 1px solid #222; padding: 15px;">
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px;">
+                INFRASTRUCTURE & DEPLOYMENT
+              </h3>
+              <div id="skillsInfra" class="tag-list" style="margin-bottom: 15px;"></div>
+
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px;">
+                TRADING APIS & CONNECTORS
+              </h3>
+              <div id="skillsPlatforms" class="tag-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: NAV / PERFORMANCE CHART -->
+      <section class="tab-panel" id="tab-perf">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">NAV &lt;GO&gt;</span>
+              <span>HISTORICAL NET ASSET VALUE (NAV) EQUITY CURVE</span>
+            </span>
+            <span style="color: var(--green);">CUMULATIVE RETURN</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="navChart"></canvas>
+          </div>
+
+          <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; background-color: #000; padding: 10px; border: 1px solid #222;">
+            <div style="display: flex; gap: 20px;">
+              <span style="color: var(--amber); font-weight: bold;">■ NQ Strategy NAV</span>
+              <span style="color: var(--cyan); font-weight: bold;">■ Market Benchmark</span>
+            </div>
+            <div style="font-size: 12px; color: var(--gray-light);">
+              Click/Hover chart points to view historical quarterly NAV value.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: EXPERIENCE & EDUCATION -->
+      <section class="tab-panel" id="tab-exp">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">CAREER &lt;GO&gt;</span>
+              <span>PROFESSIONAL EXPERIENCE & ACADEMIC BACKGROUND</span>
+            </span>
+            <span style="color: var(--cyan);">TIMELINE</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 15px;">
+                WORK EXPERIENCE
+              </h3>
+              <div class="timeline" id="expTimeline"></div>
+            </div>
+
+            <div>
+              <h3 style="color: var(--amber-bright); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 15px;">
+                EDUCATION & CERTIFICATIONS
+              </h3>
+              <div class="timeline" id="eduTimeline"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: CONTACT & LINKS -->
+      <section class="tab-panel" id="tab-contact">
+        <div class="panel-box">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="panel-tag">MSG &lt;GO&gt;</span>
+              <span>CONTACT TERMINAL & LINKEDIN CONNECT</span>
+            </span>
+            <span style="color: var(--green);">DIRECT DIRECTORY</span>
+          </div>
+
+          <div class="grid-2">
+            <div style="background-color: #000; border: 1px solid var(--amber-dim); padding: 15px;">
+              <h3 style="color: var(--white); margin-bottom: 15px;">DIRECT CONTACT CHANNELS</h3>
+
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <div style="color: var(--gray-light); font-size: 12px;">LINKEDIN PROFILE:</div>
+                  <a href="https://www.linkedin.com/in/nh%E1%BA%ADt-quang-nguy%E1%BB%85n-962499391/" target="_blank" class="bloomberg-link" id="contactLinkedin">
+                    https://www.linkedin.com/in/nhật-quang-nguyễn-962499391/
+                  </a>
+                </div>
+
+                <div>
+                  <div style="color: var(--gray-light); font-size: 12px;">EMAIL:</div>
+                  <span style="color: var(--amber-bright); font-weight: bold;" id="contactEmail">contact@nhatquang-quant.com</span>
+                </div>
+
+                <div>
+                  <div style="color: var(--gray-light); font-size: 12px;">GITHUB:</div>
+                  <a href="https://github.com/" target="_blank" class="bloomberg-link" id="contactGithub">
+                    https://github.com/
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div style="background-color: #000; border: 1px solid var(--amber-dim); padding: 15px;">
+              <h3 style="color: var(--amber-bright); margin-bottom: 10px;">QUICK MSG TO TRADER</h3>
+              <p style="color: var(--gray-light); font-size: 12px; margin-bottom: 10px;">
+                Bạn có thể gửi tin nhắn giả lập trực tiếp qua Terminal.
+              </p>
+              
+              <form id="msgForm" onsubmit="event.preventDefault(); window.sendTerminalMessage();">
+                <input type="text" id="msgName" placeholder="Your Name / Institution..." style="width: 100%; background: #111; border: 1px solid #333; color: var(--white); padding: 6px; margin-bottom: 8px; font-family: var(--font-mono);" required>
+                <textarea id="msgBody" rows="3" placeholder="Message details..." style="width: 100%; background: #111; border: 1px solid #333; color: var(--green); padding: 6px; margin-bottom: 8px; font-family: var(--font-mono);" required></textarea>
+                <button type="submit" class="action-btn" style="width: 100%;">SEND MESSAGE &lt;GO&gt;</button>
+              </form>
+              <div id="msgStatus" style="color: var(--green); margin-top: 8px; font-size: 12px;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLI OUTPUT CONTAINER LOG -->
+      <div class="cli-output-log" id="cliOutput"></div>
+
+    </main>
+
+    <!-- BOTTOM COMMAND INPUT LINE BAR -->
+    <div class="cli-bar">
+      <span class="cli-prompt">NQ-QUANT&gt;</span>
+      <div class="cli-input-wrapper">
+        <input type="text" class="cli-input" id="cliInput" placeholder="Enter command (e.g. HELP, BIO, STRAT, SKILLS, PERF, CONTACT, CLEAR) <GO>" autocomplete="off">
+      </div>
+      <button class="cli-btn" id="cliSubmit">GO</button>
+    </div>
+
+    <!-- FOOTER BAR -->
+    <footer class="footer-bar">
+      <div>BLOOMBERG TERMINAL EDITION | QUANT TRADER PORTFOLIO</div>
+      <div style="display: flex; gap: 15px;">
+        <span style="cursor: pointer; color: var(--cyan);" onclick="window.toggleCrt();">[CRT SCREEN SCANLINES]</span>
+        <span style="cursor: pointer; color: var(--amber);" onclick="window.toggleSound();" id="soundToggle">[AUDIO: OFF]</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SCRIPT FILES -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
