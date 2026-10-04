@@ -16,9 +16,9 @@ const PORTFOLIO_DATA = {
     quote: "Believe me, no: I thank my fortune for it, My ventures are not in one bottom trusted, Nor to one place; nor is my whole estate Upon the fortune of this present year: Therefore my merchandise makes me not sad.",
     quoteAuthor: "William Shakespeare — The Merchant of Venice",
     bio: [
-      "Quantitative Researcher & Modeler tập trung vào nghiên cứu và khai phá tín hiệu Alpha định lượng (Alpha Mining) trên thị trường Việt Nam (VN Market), Crypto và Forex.",
+      "Quantitative Researcher & Modeler tập trung vào nghiên cứu và khai phá tín hiệu Alpha trên thị trường phái sinh Việt Nam (VN30F), Crypto và Forex.",
       "Ứng dụng phương pháp Tiến hóa (Evolutionary Approach & Genetic Programming) vào quy trình tự động hóa tìm kiếm và chọn lọc các tín hiệu Alpha tại WorldQuant BRAIN.",
-      "Xây dựng hệ thống kiểm thử thuật toán (Backtesting Engine) cho MetaTrader 5, kết hợp chặt chẽ giữa Toán kinh tế lượng (Econometrics) và Phân tích Dữ liệu hiện đại."
+      "Xây dựng hệ thống kiểm thử thuật toán (Backtesting Engine) cho MetaTrader 5, kết hợp chặt chẽ giữa kinh tế lượng (Econometrics) và Phân tích Dữ liệu hiện đại."
     ]
   },
 
@@ -80,14 +80,14 @@ const PORTFOLIO_DATA = {
       code: "MT5-ALGO",
       name: "MT5 Quantitative Framework",
       allocation: "EXECUTION",
-      description: "Xây dựng hạ tầng kết nối dữ liệu và kiểm thử thuật toán trên MetaTrader 5 cho các thị trường Forex, Crypto và VN Derivatives.",
+      description: "Xây dựng hạ tầng kết nối dữ liệu và kiểm thử thuật toán trên MetaTrader 5 cho các thị trường Forex, Crypto.",
       tags: ["MetaTrader 5", "Python API", "Intraday/Daily", "Backtesting"]
     },
     {
       code: "MULTI-ASSET",
       name: "Cross-Market Signal Analysis",
       allocation: "MULTI-MARKET",
-      description: "Khai thác tín hiệu đa thị trường (Thị trường Chứng khoán Việt Nam, Crypto, Ngoại hối Forex) với triết lý đa dạng hóa danh mục theo phong cách cổ điển.",
+      description: "Khai thác tín hiệu đa thị trường (Thị trường Chứng khoán Việt Nam, Crypto, Ngoại hối Forex) với triết lý đa dạng hóa danh mục qua nhiều lớp tài sản.",
       tags: ["VN Market", "Crypto", "Forex", "Risk Diversification"]
     }
   ],
@@ -109,7 +109,7 @@ const PORTFOLIO_DATA = {
       details: [
         "Nghiên cứu và phát triển các mô hình tín hiệu Alpha định lượng (Formulaic Alphas) dựa trên dữ liệu tài chính đa thị trường.",
         "Ứng dụng phương pháp Evolutionary Approach (Giải thuật Di truyền) để tự động hóa quy trình tìm kiếm và sàng lọc Alpha.",
-        "Kiểm thử và đánh giá tín hiệu dựa trên tiêu chuẩn Information Coefficient (IC), Turnover và Sharpe của WorldQuant."
+        "Kiểm thử và đánh giá tín hiệu dựa trên tiêu chuẩn Information Coefficient (IC), Turnover và Fitness của WorldQuant."
       ]
     }
   ],
@@ -120,7 +120,7 @@ const PORTFOLIO_DATA = {
       period: "2025 - 2029",
       degree: "B.Sc. in Finance and Banking (Currently Sophomore)",
       institution: "Foreign Trade University (FTU) - Trường Đại học Ngoại Thương",
-      notes: "Định hướng chuyên sâu: Mô hình hóa Tài chính (Financial Modeling), Kinh tế lượng (Econometrics), Phân tích Định lượng."
+      notes: "Định hướng chuyên sâu: Xây dựng mô hình tài chính (Financial Modeling), Kinh tế lượng (Econometrics), Phân tích Định lượng (Quantitative Analysis), Tài chính quốc tế (International Finance)."
     }
   ],
 
