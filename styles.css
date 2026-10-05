@@ -113,6 +113,273 @@ html, body {
   color: var(--cyan);
 }
 
+/* LIVE L2 MARKET DEPTH */
+.l2-connection {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--amber-bright);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.l2-connection .status-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--amber-bright);
+  box-shadow: 0 0 6px var(--amber-bright);
+}
+
+.l2-connection--live { color: var(--green); }
+.l2-connection--live .status-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.l2-connection--stale { color: var(--red); }
+.l2-connection--stale .status-dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+.l2-status-line {
+  color: var(--gray-light);
+  font-size: 11px;
+  margin: -5px 0 12px;
+}
+
+.l2-market-grid {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.9fr) minmax(320px, 1.25fr) minmax(210px, 0.65fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.l2-card {
+  background: #050505;
+  border: 1px solid #2c2c2c;
+  padding: 12px;
+  min-width: 0;
+}
+
+.l2-card-title {
+  color: var(--amber-bright);
+  border-bottom: 1px solid #302400;
+  padding-bottom: 7px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.l2-card-title span {
+  color: var(--gray-mid);
+  font-size: 9px;
+  font-weight: normal;
+  text-align: right;
+}
+
+.l2-last-trade-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.l2-label,
+.l2-metric span,
+.l2-quote-grid span,
+.l2-chart-labels,
+.l2-flow-facts dt {
+  color: var(--gray-mid);
+  font-size: 10px;
+}
+
+.l2-last-trade {
+  color: var(--amber-bright);
+  font-size: clamp(20px, 2.1vw, 28px);
+  font-weight: bold;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.l2-trade-side {
+  border: 1px solid var(--gray-mid);
+  color: var(--gray-light);
+  font-size: 10px;
+  font-weight: bold;
+  padding: 3px 5px;
+}
+
+.l2-trade-side--buy { border-color: var(--green); color: var(--green); }
+.l2-trade-side--sell { border-color: var(--red); color: var(--red); }
+
+.l2-metric-grid,
+.l2-quote-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: #292929;
+  border: 1px solid #292929;
+}
+
+.l2-metric,
+.l2-quote-grid > div {
+  background: #0d0d0d;
+  padding: 7px;
+  min-width: 0;
+}
+
+.l2-metric strong,
+.l2-quote-grid strong {
+  display: block;
+  color: var(--white);
+  font-size: 12px;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.l2-sparkline-wrap {
+  border: 1px solid #272727;
+  background: #090909;
+  margin: 12px 0;
+  padding: 7px;
+}
+
+.l2-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 9px;
+}
+
+.l2-sparkline {
+  display: block;
+  height: 46px;
+  margin-top: 4px;
+  width: 100%;
+}
+
+.l2-sparkline polyline {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.l2-book {
+  display: flex;
+  flex-direction: column;
+}
+
+.l2-book-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: bold;
+  margin: 2px 1px 5px;
+}
+
+.l2-book-head--ask { color: var(--red); }
+.l2-book-head--bid { color: var(--green); margin-top: 8px; }
+
+.l2-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 179px;
+}
+
+.l2-level {
+  align-items: center;
+  display: grid;
+  font-size: 11px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 13px;
+  overflow: hidden;
+  padding: 1px 4px;
+  position: relative;
+}
+
+.l2-level::before {
+  bottom: 0;
+  content: '';
+  opacity: 0.28;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: width 120ms linear;
+  width: var(--depth, 0%);
+}
+
+.l2-level--ask::before { background: var(--red); }
+.l2-level--bid::before { background: var(--green); }
+.l2-level span { position: relative; z-index: 1; }
+.l2-level span:last-child { color: var(--white); text-align: right; }
+.l2-level--ask span:first-child { color: var(--red); }
+.l2-level--bid span:first-child { color: var(--green); }
+
+.l2-mid-strip {
+  align-items: center;
+  background: #151515;
+  border-bottom: 1px solid #343434;
+  border-top: 1px solid #343434;
+  color: var(--cyan);
+  display: flex;
+  font-size: 10px;
+  justify-content: space-between;
+  margin: 8px 0 6px;
+  padding: 5px;
+}
+
+.l2-mid-strip strong { color: var(--amber-bright); font-size: 13px; margin-left: 4px; }
+
+.l2-flow { display: flex; flex-direction: column; }
+.l2-flow-copy { color: var(--gray-light); font-size: 11px; line-height: 1.45; margin-bottom: 14px; }
+
+.l2-pressure-labels {
+  display: flex;
+  font-size: 10px;
+  font-weight: bold;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.l2-pressure-labels span:first-child { color: var(--green); }
+.l2-pressure-labels span:last-child { color: var(--red); }
+
+.l2-pressure-track {
+  background: #1f1f1f;
+  display: flex;
+  height: 18px;
+  overflow: hidden;
+}
+
+.l2-pressure-bid { background: var(--green); transition: width 120ms linear; width: 50%; }
+.l2-pressure-ask { background: var(--red); transition: width 120ms linear; width: 50%; }
+
+.l2-flow-facts { border-top: 1px solid #282828; margin-top: 16px; }
+.l2-flow-facts div { border-bottom: 1px solid #282828; display: flex; justify-content: space-between; padding: 6px 0; }
+.l2-flow-facts dd { color: var(--white); font-size: 10px; margin: 0; text-align: right; }
+
+.l2-flow-disclaimer {
+  color: var(--gray-mid);
+  font-size: 9px;
+  line-height: 1.4;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+@media (max-width: 980px) {
+  .l2-market-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .l2-flow { grid-column: span 2; }
+}
+
+@media (max-width: 650px) {
+  .l2-market-grid { grid-template-columns: 1fr; }
+  .l2-flow { grid-column: auto; }
+  .l2-card-title { align-items: flex-start; flex-direction: column; }
+  .l2-card-title span { text-align: left; }
+  .l2-levels { min-height: 0; }
+}
+
 /* LIVE TICKER BAR */
 .ticker-bar {
   background-color: #000;

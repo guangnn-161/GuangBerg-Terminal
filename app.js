@@ -149,76 +149,252 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 4. Live L2 Order Book WebSocket Stream
+  // 4. Live L2 market depth, quote, and movement streams (Binance Public WebSocket)
   function initLiveL2OrderBook() {
-    const l2Asks = document.getElementById('l2Asks');
-    const l2Bids = document.getElementById('l2Bids');
-    const l2LastPrice = document.getElementById('l2LastPrice');
-    const l2Ofi = document.getElementById('l2Ofi');
+    const dom = {
+      asks: document.getElementById('l2Asks'),
+      bids: document.getElementById('l2Bids'),
+      status: document.getElementById('l2Status'),
+      statusWrap: document.getElementById('l2StatusWrap'),
+      statusDot: document.getElementById('l2StatusDot'),
+      statusDetail: document.getElementById('l2StatusDetail'),
+      lastTrade: document.getElementById('l2LastTrade'),
+      tradeDirection: document.getElementById('l2TradeDirection'),
+      move5s: document.getElementById('l2Move5s'),
+      high60s: document.getElementById('l2High60s'),
+      low60s: document.getElementById('l2Low60s'),
+      lastSize: document.getElementById('l2LastSize'),
+      sparkline: document.getElementById('l2Sparkline'),
+      sparklineRange: document.getElementById('l2SparklineRange'),
+      bestBid: document.getElementById('l2BestBid'),
+      bestAsk: document.getElementById('l2BestAsk'),
+      spread: document.getElementById('l2Spread'),
+      microprice: document.getElementById('l2Microprice'),
+      midPrice: document.getElementById('l2MidPrice'),
+      imbalance: document.getElementById('l2Ofi'),
+      bidBar: document.getElementById('bidBarRatio'),
+      askBar: document.getElementById('askBarRatio'),
+      bidPercent: document.getElementById('bidPercentText'),
+      askPercent: document.getElementById('askPercentText'),
+      updated: document.getElementById('l2Updated'),
+    };
 
-    if (!l2Asks || !l2Bids) return;
-
-    try {
-      const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@depth5@100ms');
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.asks && data.bids) {
-          let totalBidVol = 0;
-          let totalAskVol = 0;
-
-          // Asks
-          const asksHtml = data.asks.slice().reverse().map(ask => {
-            const price = parseFloat(ask[0]).toFixed(2);
-            const qty = parseFloat(ask[1]).toFixed(3);
-            totalAskVol += parseFloat(qty);
-            return `
-              <div style="display:flex; justify-content:space-between; background: rgba(255,51,68,0.1); padding: 2px 4px;">
-                <span style="color:var(--red); font-weight:bold;">${price}</span>
-                <span style="color:var(--white);">${qty}</span>
-              </div>
-            `;
-          }).join('');
-          l2Asks.innerHTML = asksHtml;
-
-          // Bids
-          const bidsHtml = data.bids.map(bid => {
-            const price = parseFloat(bid[0]).toFixed(2);
-            const qty = parseFloat(bid[1]).toFixed(3);
-            totalBidVol += parseFloat(qty);
-            return `
-              <div style="display:flex; justify-content:space-between; background: rgba(0,255,102,0.1); padding: 2px 4px;">
-                <span style="color:var(--green); font-weight:bold;">${price}</span>
-                <span style="color:var(--white);">${qty}</span>
-              </div>
-            `;
-          }).join('');
-          l2Bids.innerHTML = bidsHtml;
-
-          const midPrice = ((parseFloat(data.bids[0][0]) + parseFloat(data.asks[0][0])) / 2).toFixed(2);
-          if (l2LastPrice) l2LastPrice.innerText = midPrice;
-
-          // OFI Calculation
-          const totalVol = totalBidVol + totalAskVol;
-          const bidRatio = totalVol > 0 ? (totalBidVol / totalVol) * 100 : 50;
-          const ofiVal = ((totalBidVol - totalAskVol) / totalVol).toFixed(2);
-
-          if (l2Ofi) l2Ofi.innerText = `OFI: ${ofiVal >= 0 ? '+' : ''}${ofiVal}`;
-          
-          const bidBar = document.getElementById('bidBarRatio');
-          const askBar = document.getElementById('askBarRatio');
-          const bidText = document.getElementById('bidPercentText');
-          const askText = document.getElementById('askPercentText');
-
-          if (bidBar) bidBar.style.width = `${bidRatio.toFixed(1)}%`;
-          if (askBar) askBar.style.width = `${(100 - bidRatio).toFixed(1)}%`;
-          if (bidText) bidText.innerText = `BIDS: ${bidRatio.toFixed(1)}%`;
-          if (askText) askText.innerText = `ASKS: ${(100 - bidRatio).toFixed(1)}%`;
-        }
-      };
-    } catch (e) {
-      console.warn("L2 depth ws error", e);
+    if (!dom.asks || !dom.bids) return;
+    if (!window.MarketMetrics) {
+      setL2Status('stale', 'METRICS MODULE UNAVAILABLE — live data is not being displayed.');
+      return;
     }
+
+    const { calculateBookMetrics, calculateMovement, formatQuantity, formatSignedPercent, updateMovementWindow } = window.MarketMetrics;
+    const displayLevelCount = 12;
+    const movementWindowMs = 60_000;
+    const streamUrl = 'wss://stream.binance.com:9443/stream?streams=btcusdt@depth20@100ms/btcusdt@bookTicker/btcusdt@aggTrade';
+    const state = {
+      asks: [],
+      bids: [],
+      bestQuote: null,
+      movement: [],
+      lastAggressor: null,
+      lastPacketAt: 0,
+      lastTrade: null,
+      reconnectAttempt: 0,
+      renderTimer: null,
+      reconnectTimer: null,
+      socket: null,
+    };
+
+    function setL2Status(kind, detail) {
+      const label = kind === 'live' ? 'LIVE' : kind === 'stale' ? 'STALE' : 'CONNECTING';
+      if (dom.status) dom.status.innerText = label;
+      if (dom.statusWrap) dom.statusWrap.className = `l2-connection l2-connection--${kind}`;
+      if (dom.statusDot) dom.statusDot.setAttribute('aria-label', `L2 stream ${label.toLowerCase()}`);
+      if (dom.statusDetail) dom.statusDetail.innerText = detail;
+    }
+
+    function formatPrice(value) {
+      return Number.isFinite(value) ? value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '--';
+    }
+
+    function formatSize(value) {
+      return formatQuantity(value);
+    }
+
+    function formatTime(timestamp) {
+      return new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+      }).format(timestamp);
+    }
+
+    function renderLevels(element, levels, side) {
+      const maxSize = Math.max(...levels.map((level) => Number.parseFloat(level[1]) || 0), 0.000001);
+      const orderedLevels = side === 'ask' ? levels.slice().reverse() : levels;
+      element.innerHTML = orderedLevels.map((level) => {
+        const price = Number.parseFloat(level[0]);
+        const quantity = Number.parseFloat(level[1]);
+        const depth = Math.min(100, (quantity / maxSize) * 100);
+        return `<div class="l2-level l2-level--${side}" style="--depth:${depth.toFixed(1)}%"><span>${formatPrice(price)}</span><span>${formatSize(quantity)}</span></div>`;
+      }).join('');
+    }
+
+    function renderSparkline(points) {
+      if (!dom.sparkline || !points.length) return;
+      const prices = points.map((point) => point.price);
+      const low = Math.min(...prices);
+      const high = Math.max(...prices);
+      const range = high - low || 1;
+      const denominator = Math.max(points.length - 1, 1);
+      const coordinates = points.map((point, index) => {
+        const x = (index / denominator) * 100;
+        const y = 26 - ((point.price - low) / range) * 24;
+        return `${x.toFixed(2)},${y.toFixed(2)}`;
+      }).join(' ');
+      dom.sparkline.setAttribute('points', coordinates);
+      if (dom.sparklineRange) dom.sparklineRange.innerText = `${formatPrice(low)} — ${formatPrice(high)}`;
+    }
+
+    function colorMovement(element, value) {
+      if (!element) return;
+      element.style.color = value > 0 ? 'var(--green)' : value < 0 ? 'var(--red)' : 'var(--cyan)';
+    }
+
+    function render() {
+      state.renderTimer = null;
+      if (!state.bids.length || !state.asks.length) return;
+
+      const visibleBids = state.bids.slice(0, displayLevelCount);
+      const visibleAsks = state.asks.slice(0, displayLevelCount);
+      const book = calculateBookMetrics(visibleBids, visibleAsks);
+      if (state.bestQuote) {
+        const quote = calculateBookMetrics(
+          [[state.bestQuote.bid, state.bestQuote.bidQuantity]],
+          [[state.bestQuote.ask, state.bestQuote.askQuantity]],
+        );
+        book.bestBid = quote.bestBid;
+        book.bestAsk = quote.bestAsk;
+        book.midPrice = quote.midPrice;
+        book.spread = quote.spread;
+        book.spreadBps = quote.spreadBps;
+        book.microprice = quote.microprice;
+      }
+      const now = Date.now();
+      const movement5s = calculateMovement(state.movement.filter((point) => point.timestamp >= now - 5_000));
+      const movement60s = calculateMovement(state.movement);
+      const imbalance = book.bidPressure - book.askPressure;
+
+      renderLevels(dom.asks, visibleAsks, 'ask');
+      renderLevels(dom.bids, visibleBids, 'bid');
+
+      if (dom.bestBid) dom.bestBid.innerText = formatPrice(book.bestBid);
+      if (dom.bestAsk) dom.bestAsk.innerText = formatPrice(book.bestAsk);
+      if (dom.spread) dom.spread.innerText = `${formatPrice(book.spread)} / ${book.spreadBps.toFixed(2)} bps`;
+      if (dom.microprice) dom.microprice.innerText = formatPrice(book.microprice);
+      if (dom.midPrice) dom.midPrice.innerText = formatPrice(book.midPrice);
+      if (dom.imbalance) dom.imbalance.innerText = `BOOK IMBALANCE ${imbalance >= 0 ? '+' : ''}${imbalance.toFixed(1)}%`;
+      if (dom.bidBar) dom.bidBar.style.width = `${book.bidPressure}%`;
+      if (dom.askBar) dom.askBar.style.width = `${book.askPressure}%`;
+      if (dom.bidPercent) dom.bidPercent.innerText = `BIDS: ${book.bidPressure.toFixed(1)}%`;
+      if (dom.askPercent) dom.askPercent.innerText = `ASKS: ${book.askPressure.toFixed(1)}%`;
+      if (dom.move5s) dom.move5s.innerText = formatSignedPercent(movement5s.changePercent);
+      colorMovement(dom.move5s, movement5s.changePercent);
+      if (dom.high60s) dom.high60s.innerText = formatPrice(movement60s.high);
+      if (dom.low60s) dom.low60s.innerText = formatPrice(movement60s.low);
+      if (dom.updated) dom.updated.innerText = state.lastPacketAt ? `${formatTime(state.lastPacketAt)} ICT` : 'WAITING';
+      renderSparkline(state.movement);
+
+      if (state.lastTrade) {
+        if (dom.lastTrade) dom.lastTrade.innerText = formatPrice(state.lastTrade.price);
+        if (dom.lastSize) dom.lastSize.innerText = formatSize(state.lastTrade.quantity);
+        if (dom.tradeDirection) {
+          dom.tradeDirection.innerText = state.lastAggressor === 'buy' ? 'BUY MARKET' : 'SELL MARKET';
+          dom.tradeDirection.className = `l2-trade-side l2-trade-side--${state.lastAggressor}`;
+        }
+      }
+    }
+
+    function scheduleRender() {
+      if (state.renderTimer) return;
+      state.renderTimer = window.setTimeout(render, 100);
+    }
+
+    function scheduleReconnect() {
+      if (state.reconnectTimer) return;
+      const delay = Math.min(1_000 * (2 ** state.reconnectAttempt), 15_000);
+      state.reconnectAttempt += 1;
+      setL2Status('stale', `STREAM CLOSED — reconnecting in ${(delay / 1_000).toFixed(0)}s.`);
+      state.reconnectTimer = window.setTimeout(() => {
+        state.reconnectTimer = null;
+        connect();
+      }, delay);
+    }
+
+    function handleMessage(message) {
+      const payload = message.data || message;
+      const stream = message.stream || '';
+      const receivedAt = Date.now();
+      state.lastPacketAt = receivedAt;
+      state.reconnectAttempt = 0;
+
+      if (stream.includes('@depth') || (Array.isArray(payload.bids) && Array.isArray(payload.asks))) {
+        state.bids = payload.bids;
+        state.asks = payload.asks;
+      }
+
+      if (stream.includes('@bookTicker') || (payload.b && payload.a && payload.B && payload.A)) {
+        const bestQuote = {
+          bid: Number.parseFloat(payload.b),
+          bidQuantity: Number.parseFloat(payload.B),
+          ask: Number.parseFloat(payload.a),
+          askQuantity: Number.parseFloat(payload.A),
+        };
+        if (Object.values(bestQuote).every(Number.isFinite)) state.bestQuote = bestQuote;
+      }
+
+      if (stream.includes('@aggTrade') || (payload.p && typeof payload.m === 'boolean')) {
+        const price = Number.parseFloat(payload.p);
+        const quantity = Number.parseFloat(payload.q);
+        if (Number.isFinite(price) && Number.isFinite(quantity)) {
+          state.lastTrade = { price, quantity };
+          // Binance marks `m` true when the buyer provided resting liquidity, so the seller was aggressive.
+          state.lastAggressor = payload.m ? 'sell' : 'buy';
+          state.movement = updateMovementWindow(state.movement, { timestamp: receivedAt, price }, movementWindowMs);
+        }
+      }
+
+      setL2Status('live', `LIVE · Binance public stream · last market packet ${formatTime(receivedAt)} ICT`);
+      scheduleRender();
+    }
+
+    function connect() {
+      setL2Status('connecting', 'Opening Binance public market-data stream…');
+      try {
+        const socket = new WebSocket(streamUrl);
+        state.socket = socket;
+        socket.onopen = () => setL2Status('connecting', 'Subscribed to depth, best quote, and aggregate trades…');
+        socket.onmessage = (event) => {
+          try {
+            handleMessage(JSON.parse(event.data));
+          } catch (error) {
+            console.warn('L2 message parse error', error);
+          }
+        };
+        socket.onerror = () => setL2Status('stale', 'STREAM ERROR — waiting for the connection to close and retry.');
+        socket.onclose = scheduleReconnect;
+      } catch (error) {
+        console.warn('L2 stream initialization error', error);
+        scheduleReconnect();
+      }
+    }
+
+    window.setInterval(() => {
+      if (!state.lastPacketAt) return;
+      const age = Date.now() - state.lastPacketAt;
+      if (age > 3_000 && state.socket?.readyState === WebSocket.OPEN) {
+        setL2Status('stale', `NO MARKET PACKET FOR ${(age / 1_000).toFixed(1)}s — checking connection.`);
+      }
+      if (age > 12_000 && state.socket?.readyState === WebSocket.OPEN) state.socket.close();
+    }, 1_000);
+
+    connect();
   }
 
   // 5. Populate Projects

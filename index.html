@@ -268,68 +268,87 @@ GUANGBERG TERMINAL | Quang Nguyen - Research Consultant @ WorldQuant</title>
         </div>
       </section>
 
-      <!-- TAB 6: REAL-TIME L2 ORDER BOOK VISUALIZER -->
+      <!-- TAB 6: REAL-TIME L2 MARKET DEPTH & MOVEMENT -->
       <section class="tab-panel" id="tab-l2">
         <div class="panel-box">
           <div class="panel-header">
             <span class="panel-title">
               <span class="panel-tag">L2 &lt;GO&gt;</span>
-              <span>LIVE WEBSOCKET ORDER BOOK DEPTH (BTC/USDT)</span>
+              <span>LIVE MARKET DEPTH &amp; FLOW (BTC/USDT)</span>
             </span>
-            <span style="color: var(--green);" id="l2Status">BINANCE STREAMING</span>
+            <span class="l2-connection l2-connection--connecting" id="l2StatusWrap">
+              <span class="status-dot" id="l2StatusDot"></span>
+              <span id="l2Status">CONNECTING</span>
+            </span>
           </div>
 
-          <div class="grid-2">
-            <!-- Asks (Sells) & Bids (Buys) -->
-            <div style="background: #000; border: 1px solid #222; padding: 12px;">
-              <div style="color: var(--red); font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between;">
-                <span>ASK PRICE (SELLS)</span>
-                <span>SIZE</span>
-              </div>
-              <div id="l2Asks" style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
-                <!-- Realtime asks -->
-              </div>
+          <div class="l2-status-line" id="l2StatusDetail" aria-live="polite">Opening Binance public market-data stream…</div>
 
-              <div style="margin: 12px 0; padding: 6px; background: #111; text-align: center; font-weight: bold; border-top: 1px solid #333; border-bottom: 1px solid #333;">
-                <span style="color: var(--white);">LAST PRICE: </span>
-                <span style="color: var(--amber-bright); font-size: 16px;" id="l2LastPrice">--</span>
-                <span style="color: var(--cyan); font-size: 12px; margin-left: 10px;" id="l2Ofi">OFI: 0.00</span>
-              </div>
-
-              <div style="color: var(--green); font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between;">
-                <span>BID PRICE (BUYS)</span>
-                <span>SIZE</span>
-              </div>
-              <div id="l2Bids" style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
-                <!-- Realtime bids -->
-              </div>
-            </div>
-
-            <!-- Depth Ladder Visualizer Chart -->
-            <div style="background: #000; border: 1px solid #222; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <h3 style="color: var(--amber-bright); margin-bottom: 10px;">ORDER FLOW IMBALANCE (OFI) ENGINE</h3>
-                <p style="color: var(--gray-light); font-size: 12px; line-height: 1.5; margin-bottom: 15px;">
-                  Bảng hiển thị thanh khoản Order Book L2 thời gian thực được kết nối trực tiếp với <strong>Binance Public WebSocket Stream</strong>.
-                </p>
-
-                <div style="background: #0a0a0a; border: 1px solid #333; padding: 10px; margin-bottom: 15px;">
-                  <div style="font-size: 11px; color: #888;">BUY/SELL PRESSURE RATIO:</div>
-                  <div style="height: 18px; background: #222; margin-top: 5px; position: relative; overflow: hidden; display: flex;">
-                    <div id="bidBarRatio" style="width: 50%; background: var(--green); height: 100%;"></div>
-                    <div id="askBarRatio" style="width: 50%; background: var(--red); height: 100%;"></div>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 4px;">
-                    <span style="color: var(--green);" id="bidPercentText">BIDS: 50%</span>
-                    <span style="color: var(--red);" id="askPercentText">ASKS: 50%</span>
-                  </div>
+          <div class="l2-market-grid">
+            <section class="l2-card l2-overview" aria-label="BTC market movement">
+              <div class="l2-card-title">MARKET MOVEMENT <span>AGG TRADE + BOOK TICKER</span></div>
+              <div class="l2-last-trade-row">
+                <div>
+                  <div class="l2-label">LAST TRADE</div>
+                  <div class="l2-last-trade" id="l2LastTrade">--</div>
                 </div>
+                <div class="l2-trade-side" id="l2TradeDirection">WAITING</div>
               </div>
 
-              <div style="text-align: center; border-top: 1px dashed #333; padding-top: 10px;">
-                <button class="action-btn" onclick="window.switchTab('tab-projects')">VIEW REAL PROJECTS &lt;GO&gt;</button>
+              <div class="l2-metric-grid">
+                <div class="l2-metric"><span>5S MOVE</span><strong id="l2Move5s">--</strong></div>
+                <div class="l2-metric"><span>60S HIGH</span><strong id="l2High60s">--</strong></div>
+                <div class="l2-metric"><span>60S LOW</span><strong id="l2Low60s">--</strong></div>
+                <div class="l2-metric"><span>LAST SIZE</span><strong id="l2LastSize">--</strong></div>
               </div>
-            </div>
+
+              <div class="l2-sparkline-wrap">
+                <div class="l2-chart-labels"><span>60S PRICE PATH</span><span id="l2SparklineRange">WAITING FOR TRADES</span></div>
+                <svg class="l2-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" role="img" aria-label="BTC trade price movement over sixty seconds">
+                  <polyline id="l2Sparkline" points="" />
+                </svg>
+              </div>
+
+              <div class="l2-quote-grid">
+                <div><span>BEST BID</span><strong id="l2BestBid">--</strong></div>
+                <div><span>BEST ASK</span><strong id="l2BestAsk">--</strong></div>
+                <div><span>SPREAD</span><strong id="l2Spread">--</strong></div>
+                <div><span>MICROPRICE</span><strong id="l2Microprice">--</strong></div>
+              </div>
+            </section>
+
+            <section class="l2-card l2-book" aria-label="BTC L2 order book">
+              <div class="l2-card-title">ORDER BOOK <span>DEPTH 20 · SHOWING 12 LEVELS</span></div>
+              <div class="l2-book-head l2-book-head--ask"><span>ASK PRICE (SELL)</span><span>SIZE / DEPTH</span></div>
+              <div id="l2Asks" class="l2-levels" aria-label="ask levels"></div>
+
+              <div class="l2-mid-strip">
+                <span>MID <strong id="l2MidPrice">--</strong></span>
+                <span id="l2Ofi">BOOK IMBALANCE --</span>
+              </div>
+
+              <div class="l2-book-head l2-book-head--bid"><span>BID PRICE (BUY)</span><span>SIZE / DEPTH</span></div>
+              <div id="l2Bids" class="l2-levels" aria-label="bid levels"></div>
+            </section>
+
+            <section class="l2-card l2-flow" aria-label="order-flow imbalance">
+              <div class="l2-card-title">ORDER FLOW <span>VISIBLE-DEPTH INDICATOR</span></div>
+              <p class="l2-flow-copy">Pressure is calculated from the currently displayed aggregated depth. It is an indicator, not a trading signal.</p>
+              <div class="l2-pressure-labels">
+                <span id="bidPercentText">BIDS: --</span>
+                <span id="askPercentText">ASKS: --</span>
+              </div>
+              <div class="l2-pressure-track" aria-label="bid ask pressure ratio">
+                <div id="bidBarRatio" class="l2-pressure-bid"></div>
+                <div id="askBarRatio" class="l2-pressure-ask"></div>
+              </div>
+              <dl class="l2-flow-facts">
+                <div><dt>FEED</dt><dd>BINANCE PUBLIC WS</dd></div>
+                <div><dt>UPDATE</dt><dd id="l2Updated">WAITING</dd></div>
+                <div><dt>DEPTH</dt><dd>20 LEVELS / SIDE</dd></div>
+              </dl>
+              <div class="l2-flow-disclaimer">Public aggregated depth can change before an order is executable. Do not use this display as execution advice.</div>
+            </section>
           </div>
         </div>
       </section>
@@ -421,6 +440,7 @@ GUANGBERG TERMINAL | Quang Nguyen - Research Consultant @ WorldQuant</title>
   <script src="js/db.js"></script>
   <script src="js/vault.js"></script>
   <script src="js/live.js"></script>
+  <script src="js/market-metrics.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
